@@ -1,4 +1,5 @@
-import MyDbHelper
+from Log import Log
+import Database.MyDbHelper as MyDbHelper
 
 
 class QueryManger:
@@ -8,6 +9,7 @@ class QueryManger:
     def __init__(self, dbHelper: MyDbHelper):
         self.__myDb = dbHelper
 
+
     def addQuery(self, query: str):
         self.__queries.append(query)
 
@@ -15,9 +17,14 @@ class QueryManger:
         return self.__queries.copy()
 
     def execute(self, query: str):
-        self.__myDb.getCursor().execute(query)
-
-
+        cursor = self.__myDb.getCursor()
+        try:
+            cursor.execute(query)
+            Log.info(__file__, "Query Successful")
+        except Exception as e:
+            Log.error(__file__, str(e) + "\n" + query)
+        finally:
+            cursor.close()
 
     def executeAll(self):
         for i in self.__queries:

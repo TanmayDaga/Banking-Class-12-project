@@ -1,5 +1,7 @@
 import mysql.connector
 
+from Log import Log
+
 
 class MyDbHelper:
     __myDb = None
@@ -9,11 +11,12 @@ class MyDbHelper:
 
         try:
             self.__myDb = mysql.connector.connect(host=host, user=user, password=password)
-        except:
-            print("Cannot Instantiate Connector.Please enter valid User Name or Password or Host")
+            Log.info(__file__, "Connection Established Successfully")
+            self.__myDb.autocommit = True
+        except Exception as e:
+            Log.error(__file__, e)
 
         __cursor = self.__myDb.cursor()
-
 
     def getDb(self):
         return self.__myDb
@@ -21,3 +24,5 @@ class MyDbHelper:
     def getCursor(self):
         return self.__myDb.cursor()
 
+    def closeDatabase(self):
+        self.__myDb.close()
