@@ -1,22 +1,26 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-
+from ui.constant_ui import *
 from Log import Log
-class SplashScreen:
-    def __init__(self, master):
-        myFrame = tk.Frame(master)
-        myFrame.place(anchor="center")
-        myFrame.pack()
 
-        (width,height) = master.size()
-        Log.info(__file__,f"{width},{height}")
 
-        img = ImageTk.PhotoImage(Image.open("Image Assests/splash_background.jpg"))
+class SplashScreen(tk.Frame):
+    def __init__(self, root):
+        super().__init__(master=root)
 
-        #
-        # img = Image.open("Image Assests/splash_background.jpg")
-        # img = ImageTk.PhotoImage(img)
-        self.imageLabel = tk.Label(myFrame, image=img)
+        self.pack(fill="both", expand=True)
+        self.__initViews()
+        Log.info(__file__, "SplashScreen Frame Created")
+
+    def __initViews(self):
+        # Setting Background
+        img = ImageTk.PhotoImage(Image.open("ui/Image Assests/splash_background.jpg").resize((WIDTH_WINDOW, HEIGHT_WINDOW),
+                                                                                          Image.ANTIALIAS))
+        self.imageLabel = tk.Label(self, image=img)
         self.imageLabel.image = img
 
-        self.imageLabel.pack(pady=20)
+        self.imageLabel.pack()
+
+    def destroy(self) -> None:
+        Log.info(__file__, "SplashScreen Frame Destroyed")
+        super().destroy()

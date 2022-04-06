@@ -1,13 +1,23 @@
+import threading
+import time
 import tkinter as tk
+from ui.constant_ui import *
 
-from layout_splash_screen import SplashScreen
+from Log import Log
 
 
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    root.title("hello World")
-    root.geometry("400x400")
-    sp = SplashScreen(root)
 
-    root.mainloop()
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        # Setting Window Properties (widthxheight)
+        self.geometry(f"{WIDTH_WINDOW}x{HEIGHT_WINDOW}")
+
+        self.resizable(width=False, height=False)
+        self.title(TITLE_WINDOW)
+        Log.info(__file__, "MainWindow Created")
+
+
+
