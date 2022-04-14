@@ -1,4 +1,5 @@
 class TransactionTypes:
+    """static class for holding constants for TransactionTypes table"""
     TABLE_NAME = "transaction_types"
     COLUMN_TRANSACTION_TYPES_CODE = "transaction_type_code"
     COLUMN_TRANSACTION_TYPES_DESCRIPTION = "transaction_types_description"

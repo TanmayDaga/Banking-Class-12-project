@@ -2,6 +2,7 @@ from Database.Entities.Account import Accounts
 
 
 class Users:
+    """static class for holding constants for Users table"""
     TABLE_NAME = "Users"
     COLUMN_USERID = "USERID"
     COLUMN_PASSWORD = "PASSWORD"

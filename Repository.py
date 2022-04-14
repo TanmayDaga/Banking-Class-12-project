@@ -6,162 +6,97 @@ from Database.Entities.Account import Accounts
 from Database.Entities.AccountTypes import AccountType
 from Database.Entities.TransactionTypes import TransactionTypes
 from Database.Entities.Transactions import Transaction
-import Database.DummyData as DummyData
-from Database.QueryManager import QueryManger
+
 from Database.MyDbHelper import MyDbHelper
 from mysql.connector.connection import MySQLCursor
 
 
 class Repository:
+    """The purpose of class is to establish connection between ui and database"""
     __instance = None
     __dbHelper = None
-    __queryManager = None
 
     @staticmethod
-    def get_instance():
+    def get_instance() -> 'Repository':  # Used string as class doesn't exist at the time of parsing
+        """The get_instance method is a static method maintaining and returing only single instance of class
+        implementing singleton method
+        :param:.
+        :return: Repository class Instance.
+        """
         if Repository.__instance is None:
             Repository.__instance = Repository()
             Log.info(__file__, "Repository instance created")
         return Repository.__instance
 
     def setDbHelper(self, host, user, password):
+
+        """
+        The setDbHelper function is used to set the database helper object.
+        It is called by the constructor of the Repository class, and it takes three parameters: host, user and password.
+        The function sets a new instance of DbHelper as an attribute on itself with name __dbHelper.
+
+        :param self: Used to Represent the instance of the object itself.
+        :param host: Used to Specify the hostname of the database server.
+        :param user: Used to Set the user name for the database connection.
+        :param password: Used to Set the password for the database.
+        :return:.
+        """
+
         Log.info(__file__, f"{host},{user},{password}")
         if Repository.__dbHelper is None:
             Repository.__dbHelper = MyDbHelper(host=host, user=user, password=password)
-
-        self.__setQueryManager()
-        self.__initialiseDb()
-
-    def __setQueryManager(self):
-        if Repository.__queryManager is None:
-            Repository.__queryManager = QueryManger(self.__dbHelper)
-            Log.warn(__file__, "queryManager already set")
+        # self.__initialiseDb()
+        self.execute(f"USE {DATABASE_NAME}")
 
     def __initialiseDb(self):
-        if self.__queryManager is not None:
-            self.__queryManager.addQuery(f"DROP DATABASE {DATABASE_NAME}")
-            self.__queryManager.addQuery(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};")
+        """
+        The __initialiseDb function is a private function that is called by the constructor of the Database class.
+        It creates a database with name 'banking' if it does not exist and then switches to this database.
+        The tables are created in this database, including: account types, accounts, transaction types and transactions.
+        :param self: Used to Access variables that belongs to the class.
+        :return:.
+        """
 
-            self.__queryManager.addQuery(f"USE {DATABASE_NAME}")
+        if self.__dbHelper is not None:
+            # for testing purpose
+            self.execute(f"DROP DATABASE {DATABASE_NAME}")
+            self.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};")
+
+            self.execute(f"USE {DATABASE_NAME}")
 
             # Creating table account types
-            self.__queryManager.addQuery(AccountType.getCreateQuery())
-            self.__queryManager.addQuery(Accounts.getCreateQuery())
+            self.execute(AccountType.getCreateQuery())
+            self.execute(Accounts.getCreateQuery())
 
-            self.__queryManager.addQuery(TransactionTypes.getCreateQuery())
-            self.__queryManager.addQuery(Transaction.getCreateQuery())
+            self.execute(TransactionTypes.getCreateQuery())
+            self.execute(Transaction.getCreateQuery())
 
-            self.__queryManager.addQuery(Users.getCreateQuery())
-            self.__queryManager.executeAll()
+            self.execute(Users.getCreateQuery())
 
-            DummyData.insertDummyData(self.__queryManager)
+            # for testing purpose
+            # DummyData.insertDummyData(self)
 
-    def validator(self, userid: str, password: str) -> (bool, int):
-        try:
-            cursor = self.__queryManager.execute(
-                f'SELECT {Users.COLUMN_ACCOUNT_ID} FROM {Users.TABLE_NAME} WHERE {Users.COLUMN_USERID} = "{userid}" and {Users.COLUMN_PASSWORD} = "{password}"')
-            records = cursor.fetchall()
+    def execute(self, query: str) -> MySQLCursor:
 
-            if len(records) != 0:
-                for row in records:
-                    return True, row[0]
-        except Exception as e:
-            Log.error(__file__, str(e))
-
-        return False, None
-
-    def getDataById(self, userId: int) -> MySQLCursor:
         """
-        The getDataById function accepts an integer as a parameter and returns the data associated with that account.
-        The function is used to retrieve the data of a specific account from the database.
+        The execute function takes a query as an argument and returns the cursor object.
+        It then executes the query using the cursor object, and if successful, it will return
+        the cursor object. If there is an error executing the query, it will log that error and return none.
 
         :param self: Used to Access variables that belongs to the class.
-        :param userId:int: ID Of account whose data to be accessed.
-        :return: The data of the account holder with the given id.
+        :param query:str: Used to Pass in the sql query that will be executed.
+        :return: A cursor.
         """
 
+        cursor = self.__dbHelper.getCursor()
+
         try:
-            cursor = self.__queryManager.execute(
-                f'SELECT {Accounts.COLUMN_ACCOUNT_HOLDER_NAME},{Accounts.COLUMN_ACCOUNT_HOLDER_DOB},'
-                f'{Accounts.COLUMN_ACCOUNT_HOLDER_ADDRESS},{Accounts.COLUMN_ACCOUNT_PHONE_NUMBER},{Accounts.COLUMN_ACCOUNT_EMAIL_ID},'
-                f'{Accounts.COLUMN_ACCOUNT_BALANCE},{Accounts.COLUMN_ACCOUNT_OPEN_DATE},{Accounts.COLUMN_OTHER_ACCOUNT_DETAILS},{Accounts.COLUMN_ACCOUNT_TYPE} '
-                f' FROM {Accounts.TABLE_NAME} WHERE {Accounts.COLUMN_ACCOUNTS_ID} = {userId};')
+            cursor.execute(query)
+            Log.info(__file__, "Query Successful")
+
             return cursor
         except Exception as e:
-            Log.error(__file__, str(e))
+            Log.error(__file__, str(e) + "\n" + query)
 
-        return None
-
-    def getDescriptionOfAccountType(self, accountTypeCode) -> str:
-        """
-        The getDescriptionOfAccountType function accepts an account type code and returns the description of that
-        account type.
-
-        :param self: Used to Access variables that belongs to the class.
-        :param accountTypeCode: Used to Get the description of an account type.
-        :return: The description of the account type.
-        """
-
-        try:
-            cursor = self.__queryManager.execute(
-                f'SELECT {AccountType.COLUMN_ACCOUNT_TYPES_DESCRIPTION} FROM {AccountType.TABLE_NAME} WHERE {AccountType.COLUMN_ACCOUNT_TYPES_CODE} = {accountTypeCode};')
-            records: list = cursor.fetchall()
-            return records[0][0]
-
-        except Exception as e:
-            Log.error(__file__, "Error retriveing account Type:" + str(e))
-
-        return None
-
-    def getOtherUsersForTransactions(self, currUserId: int) -> list:
-        """
-        The getOtherUsersForTransactions function returns a list of all the other users who have accounts in the database.
-        The function takes one argument, currUserId, which is an integer representing the current user's account ID.
-
-        :param self: Used to Access variables that belongs to the class.
-        :param currUserId:int: Used to Check if the account holder name is not equal to the current user id.
-        :return: A list of all the other users who have accounts in the database.
-        """
-
-        try:
-            cursor = self.__queryManager.execute(
-                f'SELECT {Accounts.COLUMN_ACCOUNT_HOLDER_NAME} FROM {Accounts.TABLE_NAME} WHERE {Accounts.COLUMN_ACCOUNTS_ID} <> {currUserId};'
-            )
-            records: list = cursor.fetchall()
-
-            resultList: list = list(
-                map(lambda x: x[0], records))  # records = [["williamjones",],["otherusername"],....]
-
-            return resultList
-
-        except Exception as e:
-            Log.error(__file__, "Error Retriveing other user names " + str(e))
-
-        return None
-
-    def getTransactionTypes(self) -> list:
-        """
-        The getTransactionTypes function returns a list of all the transaction types in the database.
-        The function takes no arguments and returns a list of strings.
-
-        :param self: Used to Access variables that belongs to the class.
-        :return: A list of all the transaction types in the database.
-
-        :doc-author: Trelent
-        """
-
-        try:
-            cursor = self.__queryManager.execute(
-                f'SELECT {TransactionTypes.COLUMN_TRANSACTION_TYPES_DESCRIPTION} FROM {TransactionTypes.TABLE_NAME};'
-            )
-            records: list = cursor.fetchall()
-
-            resultList: list = list(
-                map(lambda x: x[0], records))  # records = [["rtgs",],["neft"],....]
-
-            return resultList
-
-        except Exception as e:
-            Log.error(__file__, "Error Retriveing other user names " + str(e))
-
+        cursor.close()
         return None

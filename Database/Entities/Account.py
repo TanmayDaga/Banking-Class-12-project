@@ -2,6 +2,8 @@ from Database.Entities.AccountTypes import AccountType
 
 
 class Accounts:
+    """static class for holding constants for Accounts table"""
+
     TABLE_NAME = "accounts"
     COLUMN_ACCOUNTS_ID = "account_id"
     COLUMN_ACCOUNT_HOLDER_NAME = "account_name"

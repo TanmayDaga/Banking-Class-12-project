@@ -3,6 +3,7 @@ from Database.Entities.TransactionTypes import TransactionTypes
 
 
 class Transaction:
+    """static class for holding constants for Transaction table"""
     TABLE_NAME = "transactions"
     COLUMN_TRANSACTION_ID = "transaction_id"
     COLUMN_DATE = "date_of_transaction"

@@ -4,12 +4,16 @@ from tkinter import ttk
 from Repository import Repository
 from Log import Log
 
+from ui.dataholders.TransactPageViewModel import TransactPageViewModel
+
+from ui.constants_ui import CODE_TRANSACTION_SUCCESSFUL_PAGE, CODE_TRANSACTION_UNSUCCESSFUL_PAGE
+
 
 class TransactionPage(tk.Frame):
     """The class is inherited from tk.Frame and creates the required frame"""
     __userId: int
 
-    def __init__(self, root, userid: int, balance: float):  # Not use type hinting for root as Circular import error
+    def __init__(self, root):  # Not use type hinting for root as Circular import error
         """
         Initialises the ui of the frame and data
 
@@ -21,11 +25,16 @@ class TransactionPage(tk.Frame):
         """
 
         super().__init__(master=root, width=500, height=500)
-
+        self.__root = root
         self.pack(fill="both", expand=True, anchor="center")
 
-        self.__userId = userid
-        self.__balance = balance
+        self.__initViews()
+
+        Log.info(__file__,"TransactionPageFrame Created")
+        TransactPageViewModel.get_instance().getUsers(self.__root.curUserId, self.__onUpdateUsers)
+        TransactPageViewModel.get_instance().getTransactionTypes(self.__onUpdateTransactionTypes)
+
+    def __initViews(self):
 
         # Row 0
 
@@ -33,7 +42,7 @@ class TransactionPage(tk.Frame):
         self.__transactLabel.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
         # Row 1
-        self.__toUserName = tk.Label(self,text="Transfer Amount To")
+        self.__toUserName = tk.Label(self, text="Transfer Amount To")
         self.__toUserName.grid(row=1, column=0, padx=10, sticky="w")
 
         self.__selectedUser = tk.StringVar()
@@ -63,40 +72,40 @@ class TransactionPage(tk.Frame):
 
         # Row 4
         self.__transactFinalButton = tk.Button(self, text="Proceed")
+        self.__transactFinalButton.configure(command=
+                                             lambda: TransactPageViewModel.get_instance()
+                                             .startTransaction(self.__root.curUserId, self.__selectedUser.get(),
+                                                               self.__transactAmountText.get(),
+                                                               self.__transactType.get(),
+                                                               self.__onTransactionCompleted))
         self.__transactFinalButton.grid(row=4, column=1, sticky="e")
 
-        thread = threading.Thread(target=self.__populateUi)
-        thread.start()
+    def __onUpdateUsers(self, userList: list):
 
-    def __populateUi(self) -> None:
-        """
-        The __populateUi function populates the user interface with data from the database.
-        The function uses a list of users, which are retrieved from the database using
-        the getOtherUsersForTransactions method in Repository class, and adds them to a combobox widget.
-        The transaction types are also retrieved using getTransactionTypes,and are added  to the combobox widget.
-
-        :param self: Used to Access variables that belongs to the class.
-        :return:.
-
-        """
-
-        # Creating new variable cause there required lists references are passed to entry
-        # using .set as directly setting will reassign variable
-        userList = Repository.get_instance().getOtherUsersForTransactions(self.__userId)
         self.__toUserNameCombobox['values'] = userList
         self.__selectedUser.set(userList[0])
 
-        transactionTypeList = Repository.get_instance().getTransactionTypes()
-        self.__transactTypeCombobox['values'] = transactionTypeList
-        self.__transactType.set(transactionTypeList[0])
+    def __onUpdateTransactionTypes(self, transactionTypesList: list):
+        self.__transactTypeCombobox['values'] = transactionTypesList
+        self.__transactType.set(transactionTypesList[0])
 
     def __validateAmount(self, valueFinal, valuePrior) -> bool:
+
         Log.info(__file__, "Validate amount called")
         if valueFinal == "" or valueFinal is None:
             return True
         try:
-            if (float(valueFinal) <= self.__balance):
-                return True
+            float(valueFinal)
+            return True
         except ValueError:
             pass
         return False
+
+    def __onTransactionCompleted(self, isSuccesful: bool,msg):
+        uiCode = CODE_TRANSACTION_UNSUCCESSFUL_PAGE
+        if isSuccesful: uiCode = CODE_TRANSACTION_SUCCESSFUL_PAGE
+        self.__root.transition(self, uiCode)
+
+    def destroy(self) -> None:
+        Log.info(__file__, "TransactionPageFrame Destroyed")
+        super().destroy()
