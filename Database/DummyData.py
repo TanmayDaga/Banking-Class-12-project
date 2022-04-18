@@ -1,7 +1,6 @@
-from Repository import Repository
-Repository.get_instance().setDbHelper("localhost","root","TanmayDaga")
 
-def insertDummyData(repoInstance: Repository):
+
+def insertDummyData(repoInstance):
     # Into Account Types
     repoInstance.execute(
         'INSERT INTO account_types(account_types_code,account_types_description) VALUES(1,"Current Account");')
@@ -36,4 +35,3 @@ VALUES(CURDATE(),32322,2,1,2),
     repoInstance.execute("""INSERT INTO `USERS` VALUES("@CHARLESGREEN","HELLOWORLD",2);""")
     repoInstance.execute("""INSERT INTO `USERS` VALUES("@TANMAYDAGA","JLSADKJ",3),("@VIVEKMAHESHWARI","SADJFJLK",4);""")
     repoInstance.execute("""INSERT INTO `USERS` VALUES("@VISHESHJAIN","SFLAKJ",5);""")
-insertDummyData(Repository.get_instance())

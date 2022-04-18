@@ -1,3 +1,4 @@
+from Database import DummyData
 from Database.Entities.Users import Users
 from Log import Log
 from Constants import *
@@ -45,8 +46,8 @@ class Repository:
         Log.info(__file__, f"{host},{user},{password}")
         if Repository.__dbHelper is None:
             Repository.__dbHelper = MyDbHelper(host=host, user=user, password=password)
-        # self.__initialiseDb()
-        self.execute(f"USE {DATABASE_NAME}")
+        self.__initialiseDb()
+        
 
     def __initialiseDb(self):
         """
@@ -74,7 +75,7 @@ class Repository:
             self.execute(Users.getCreateQuery())
 
             # for testing purpose
-            # DummyData.insertDummyData(self)
+            DummyData.insertDummyData(self)
 
     def execute(self, query: str) -> MySQLCursor:
 

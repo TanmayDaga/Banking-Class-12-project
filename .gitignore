@@ -1,0 +1,9 @@
+.idea
+DS_Store
+__pycache__
+
+./Database/__pycache__/
+./Database/DS_Store
+
+./Database/Entities/__pycache__/
+./Database/DS_Store
