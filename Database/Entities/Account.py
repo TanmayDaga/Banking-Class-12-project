@@ -24,7 +24,7 @@ class Accounts:
                 f"{cls.COLUMN_ACCOUNT_HOLDER_DOB} DATE NOT NULL,"
                 f"{cls.COLUMN_ACCOUNT_HOLDER_ADDRESS} VARCHAR(100) NOT NULL,"
                 f"{cls.COLUMN_ACCOUNT_PHONE_NUMBER} DECIMAL(10,0) NOT NULL,"
-                f"{cls.COLUMN_ACCOUNT_EMAIL_ID} VARCHAR(30),"
+                f"{cls.COLUMN_ACCOUNT_EMAIL_ID} VARCHAR(80),"
                 f"{cls.COLUMN_ACCOUNT_BALANCE} DECIMAL(11,2) NOT NULL,"
                 f"{cls.COLUMN_ACCOUNT_OPEN_DATE} DATE DEFAULT (CURDATE()),"
                 f"{cls.COLUMN_OTHER_ACCOUNT_DETAILS} VARCHAR(100),"
