@@ -1,9 +1,11 @@
+import matplotlib.pyplot
+
 from Log import Log
 from Database.Entities.Account import Accounts
 from Repository import Repository
 from typing import Callable
 from Database.Entities.AccountTypes import AccountType
-
+from Database.Entities.Transactions import Transaction
 
 
 class UserInterFaceModel:
@@ -91,3 +93,46 @@ class UserInterFaceModel:
         if cursor is not None:
             records = cursor.fetchone()
             return records[0]
+
+    def plotGraph(self, userAccountId, curBalance):
+        cursor = Repository.get_instance().execute(f"""
+            SELECT {Transaction.COLUMN_AMOUNT_OF_TRANSACTION},{Transaction.COLUMN_FROM_ACCOUNT_ID},{Transaction.COLUMN_TO_ACCOUNT_ID},{Transaction.COLUMN_DATE}
+             FROM {Transaction.TABLE_NAME} WHERE {Transaction.COLUMN_FROM_ACCOUNT_ID} = {userAccountId} OR {Transaction.COLUMN_TO_ACCOUNT_ID} = {userAccountId} ORDER BY {Transaction.COLUMN_DATE}
+        """)
+
+        records = cursor.fetchall()
+
+        # now records = list of tuples (amount,date_of_transaction)
+        records = list(map(lambda x: self.__checkifamountDeducted(x, userAccountId), records))
+        amountToBeDeducted = sum(map(lambda x: x[0], records))
+        initialBalance = float(curBalance) - amountToBeDeducted  # curbalance is in decimal.decimal datatype
+        (x, y) = self.__getAmountToShowList(initialBalance, records)
+        fig, ax = matplotlib.pyplot.subplots()
+        ax.plot(x, y)
+
+        ax.ticklabel_format(style='plain',axis='y')  # Prevent scientific notaiton
+        matplotlib.pyplot.show()
+
+    def __checkifamountDeducted(self, elementx, curUserid) -> tuple:
+        """
+
+        :param elementx: object with amount of transaction ,from user id ,touser id
+        :param curUserid:current user id
+        :return: if amount deducted then false else true
+        """
+        if curUserid == elementx[1]:
+            return (-float(elementx[0]), elementx[3])
+        else:
+            return (float(elementx[0]), elementx[3])
+
+    def __getAmountToShowList(self, initalBalance, transactionsList):
+        curBalance = initalBalance
+        finalListY = []
+        finalListX = []
+
+        for i in transactionsList:
+            curBalance += i[0]
+            finalListY.append(curBalance)
+            finalListX.append(i[1])
+
+        return finalListX, finalListY

@@ -9,6 +9,7 @@ from ui.constants_ui import CODE_TRANSACTION_PAGE, CODE_DETAILS_UPDATE_PAGE, COD
 
 class UserInterface(tk.Frame):
     """The class is inherited from tk.Frame and creates the required frame"""
+    __curBalance = None
 
     def __init__(self, root):
         """
@@ -93,11 +94,16 @@ class UserInterface(tk.Frame):
 
         self.__transactButton = tk.Button(master=self, text="Transact Amount")
         self.__transactButton.configure(command=lambda: self.__root.transition(self, CODE_TRANSACTION_PAGE))
-        self.__transactButton.grid(row=9, column=0, sticky="w", padx=10, pady=5)
+        self.__transactButton.grid(row=10, column=0, sticky="w", padx=10, pady=5)
 
         self.__updatePageButton = tk.Button(master=self, text="Update Details")
         self.__updatePageButton.configure(command=lambda: self.__root.transition(self, CODE_DETAILS_UPDATE_PAGE))
         self.__updatePageButton.grid(row=10, column=1, sticky="e", pady=5)
+
+        self.__showGraphButton = tk.Button(master=self, text="Show Graph")
+        self.__showGraphButton.configure(
+            command=lambda: UserInterFaceModel.get_instance().plotGraph(self.__root.curUserId, self.__curBalance))
+        self.__showGraphButton.grid(row=11, column=0, sticky="e", pady=5)
 
         UserInterFaceModel.get_instance().getData(self.__root.curUserId, self.onDataUpdated)
 
@@ -109,12 +115,13 @@ class UserInterface(tk.Frame):
         :return: None
         """
 
+        self.__curBalance = data[UserInterFaceModel.KEY_BALANCE_AMOUNT]
         self.__userIdText.set(data[UserInterFaceModel.KEY_USER_NAME])
         self.__accountOpenLabel.configure(
             text="Account Open Date: " + str(data[UserInterFaceModel.KEY_ACCOUNT_OPEN_DATE]))  # would be a date object
         self.__accountTypeLabel.configure(text="Account Type: " + str(data[UserInterFaceModel.KEY_ACCOUNT_TYPE]))
         self.__balanceAmountLabel.configure(
-            text="Balance Amount: " + str(data[UserInterFaceModel.KEY_BALANCE_AMOUNT]))  # would be decimal
+            text="Balance Amount: " + str(self.__curBalance))  # would be decimal
         self.__personalDetailsLabel.configure(
             text="Other Details: " + str(data[UserInterFaceModel.KEY_ACCOUNT_OTHER_DETAILS]))
         self.__addressTextLabel.configure(text=data[UserInterFaceModel.KEY_USER_ADDRESS])

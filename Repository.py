@@ -9,7 +9,7 @@ from Database.Entities.Transactions import Transaction
 
 from Database.MyDbHelper import MyDbHelper
 from mysql.connector.connection import MySQLCursor
-from Database import DummyData
+from Database.DummyData import DummyData
 
 class Repository:
     """The purpose of class is to establish connection between ui and database"""
@@ -45,7 +45,7 @@ class Repository:
         Log.info(__file__, f"{host},{user},{password}")
         if Repository.__dbHelper is None:
             Repository.__dbHelper = MyDbHelper(host=host, user=user, password=password)
-        self.__initialiseDb()
+        # self.__initialiseDb()
         self.execute(f"USE {DATABASE_NAME}")
 
     def __initialiseDb(self):

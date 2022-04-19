@@ -17,7 +17,7 @@ class Transaction:
     def getCreateQuery(cls):
         return (f"CREATE TABLE IF NOT EXISTS {cls.TABLE_NAME}("
                 f"{cls.COLUMN_TRANSACTION_ID} INT(10) PRIMARY KEY AUTO_INCREMENT ,"
-                f"{cls.COLUMN_DATE} date,"
+                f"{cls.COLUMN_DATE} datetime,"
                 f"{cls.COLUMN_AMOUNT_OF_TRANSACTION} DECIMAL(11,2),"
                 f"{cls.COLUMN_FROM_ACCOUNT_ID} INT(10),"
                 f"{cls.COLUMN_TO_ACCOUNT_ID} INT(10),"
