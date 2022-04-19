@@ -1,3 +1,7 @@
+from Database.Entities import Transactions
+from Database.Entities.Account import Accounts
+from Log import Log
+
 
 def insertDummyData(repoInstance):
     # --------------------------------------- Into Account Types---------------------------------------
@@ -76,93 +80,10 @@ VALUES
         VALUES(1,"NEFT"),(2,"RTGS"),(3,"IMPS"),(4,"UPI"),(5,"AEPS"),(6,"BANKING CARDS"),(7,"CHEQUE");""")
 
     # --------------------------------------- Dummy data for transactions---------------------------------------
-    repoInstance.execute("""
-        INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2023-02-18",16981,27,2,2,null),
-  ("2022-02-23",13903,29,10,6,null),
-  ("2021-05-24",19449,7,16,2,null),
-  ("2021-08-26",18839,27,33,5,null),
-  ("2022-07-26",25133,31,18,6,null),
-  ("2021-12-23",14182,25,1,1,null),
-  ("2022-08-03",16733,22,39,5,null),
-  ("2022-12-03",26281,33,23,2,null),
-  ("2021-06-04",18973,32,34,5,null),
-  ("2023-01-18",27157,11,19,4,null);
-    """)
+    for i in dataOfTransaction:
+        startTransaction(repoInstance, int(i["from_account"]), int(i["to_account"]), int(i["amount_of_transaction"]),
+                         int(i["transaction_type_code"]))
 
-    repoInstance.execute("""
-    INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2021-11-17",28306,34,25,5,null),
-  ("2023-01-06",20419,35,5,1,null),
-  ("2021-10-31",13604,32,15,1,null),
-  ("2023-02-18",10594,37,15,4,null),
-  ("2022-09-08",13537,5,26,2,null),
-  ("2022-06-08",19620,7,10,6,null),
-  ("2022-05-29",24696,31,20,6,null),
-  ("2022-01-09",20118,21,12,1,null),
-  ("2023-03-23",22131,37,30,3,null),
-  ("2021-06-27",10947,38,19,6,null);""")
-
-    repoInstance.execute("""
-    INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2022-04-02",10182,9,7,2,null),
-  ("2022-02-10",14891,2,18,5,null),
-  ("2022-06-23",28244,22,20,2,null),
-  ("2022-06-08",24059,19,31,2,null),
-  ("2023-01-09",25302,7,25,2,null),
-  ("2022-08-30",12226,31,25,5,null),
-  ("2022-12-11",16838,6,7,7,null),
-  ("2022-07-28",28571,4,17,3,null),
-  ("2022-08-20",25790,5,10,4,null),
-  ("2021-08-19",24541,30,9,3,null);""")
-
-    repoInstance.execute("""
-    INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2021-07-28",13098,26,5,6,null),
-  ("2022-11-27",13566,3,1,5,null),
-  ("2023-03-08",23150,32,32,4,null),
-  ("2023-02-26",21158,16,24,2,null),
-  ("2022-08-03",20681,12,5,3,null),
-  ("2022-04-15",15644,18,38,5,null),
-  ("2022-12-18",28399,14,5,7,null),
-  ("2021-05-20",29126,4,7,3,null),
-  ("2023-02-22",27106,35,21,2,null),
-  ("2021-07-13",27403,21,18,2,null);
-    """)
-
-    repoInstance.execute("""
-    INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2023-01-29",22200,17,12,3,null),
-  ("2021-08-23",24871,17,3,3,null),
-  ("2022-08-09",22829,40,20,3,null),
-  ("2022-10-09",23651,19,31,5,null),
-  ("2022-05-02",19445,22,27,6,null),
-  ("2022-01-31",26635,18,34,3,null),
-  ("2021-08-18",23347,33,24,2,null),
-  ("2022-08-04",18368,2,37,6,null),
-  ("2021-12-11",14687,18,16,4,null),
-  ("2022-05-28",29051,29,22,3,null);
-    """)
-
-    repoInstance.execute("""
-    INSERT INTO `transactions` (`date_of_transaction`,`amount_of_transaction`,`from_account`,`to_account`,`transaction_type_code`,`other_details`)
-VALUES
-  ("2021-12-08",10945,26,26,5,null),
-  ("2021-11-17",29893,30,5,4,null),
-  ("2021-08-02",15747,13,26,2,null),
-  ("2022-05-26",21570,26,24,6,null),
-  ("2021-10-25",14798,5,5,3,null),
-  ("2021-05-26",16739,39,6,2,null),
-  ("2023-03-03",10290,11,3,7,null),
-  ("2021-10-08",18307,30,18,7,null),
-  ("2022-07-16",19036,26,4,2,null),
-  ("2022-03-10",13168,35,25,2,null);
-    """)
     # --------------------------------------- Dummy Data of users---------------------------------------
     repoInstance.execute("""
         INSERT INTO `Users`(USERID,ACCOUNTID)
@@ -185,12 +106,148 @@ VALUES
     records = cursor.fetchall()
     records = list(map(lambda x: x[0], records))
     for i in range(40):
-        repoInstance.execute(f"update `Users` set password = '{setpassowrdlengthto16(data[i][text])}' WHERE USERID = '@{records[i]}';")
+        repoInstance.execute(
+            f"update `Users` set password = '{setpassowrdlengthto16(data[i][text])}' WHERE USERID = '@{records[i]}';")
 
 
-
-def setpassowrdlengthto16(password)->str:
-    if(len(password)>16):
+def setpassowrdlengthto16(password) -> str:
+    if (len(password) > 16):
         return password[0:16]
     return password
 
+
+def startTransaction(repoInstance, fromUserId: int, toUserId, amount, transactionType: int):
+
+    try:
+
+        # Getting current User Bank Balance
+        cursorAmount = repoInstance.get_instance().execute(
+            f"SELECT {Accounts.COLUMN_ACCOUNT_BALANCE} FROM {Accounts.TABLE_NAME} WHERE {Accounts.COLUMN_ACCOUNTS_ID} = {fromUserId}"
+        )
+
+        if cursorAmount.fetchall()[0][0] < amount: raise Exception("Not enough balance")
+
+        # Deducting amount
+        repoInstance.get_instance().execute(
+            f"UPDATE {Accounts.TABLE_NAME} SET {Accounts.COLUMN_ACCOUNT_BALANCE} = {Accounts.COLUMN_ACCOUNT_BALANCE}-{amount} WHERE {Accounts.COLUMN_ACCOUNTS_ID} = {fromUserId}"
+        )
+
+        # Crediting amount
+        repoInstance.get_instance().execute(
+            f"UPDATE {Accounts.TABLE_NAME} SET {Accounts.COLUMN_ACCOUNT_BALANCE} = {Accounts.COLUMN_ACCOUNT_BALANCE}+{amount} WHERE {Accounts.COLUMN_ACCOUNTS_ID} = {toUserId};"
+        )
+
+        # Adding the transaction to transaction table
+
+        repoInstance.get_instance().execute(
+            f"INSERT INTO {Transactions.Transaction.TABLE_NAME}({Transactions.Transaction.COLUMN_DATE},{Transactions.Transaction.COLUMN_AMOUNT_OF_TRANSACTION},{Transactions.Transaction.COLUMN_FROM_ACCOUNT_ID},{Transactions.Transaction.COLUMN_TO_ACCOUNT_ID},{Transactions.Transaction.COLUMN_TRANSACTION_TYPE_CODE}) VALUES(CURDATE(),{amount}"
+            f",{fromUserId},{toUserId},{transactionType});"
+        )
+        Log.info(__file__,"Transaction successful")
+
+
+    except TypeError as e:
+        Log.error(__file__, str(e))
+
+
+dataOfTransaction = [
+    {"amount_of_transaction": "11481", "from_account": "26", "to_account": "17", "transaction_type_code": "4"},
+    {"amount_of_transaction": "13497", "from_account": "21", "to_account": "4", "transaction_type_code": "7"},
+    {"amount_of_transaction": "19828", "from_account": "2", "to_account": "17", "transaction_type_code": "2"},
+    {"amount_of_transaction": "19893", "from_account": "29", "to_account": "13", "transaction_type_code": "4"},
+    {"amount_of_transaction": "17207", "from_account": "13", "to_account": "6", "transaction_type_code": "5"},
+    {"amount_of_transaction": "16552", "from_account": "10", "to_account": "16", "transaction_type_code": "3"},
+    {"amount_of_transaction": "12209", "from_account": "26", "to_account": "11", "transaction_type_code": "1"},
+    {"amount_of_transaction": "27737", "from_account": "4", "to_account": "17", "transaction_type_code": "2"},
+    {"amount_of_transaction": "15557", "from_account": "22", "to_account": "28", "transaction_type_code": "3"},
+    {"amount_of_transaction": "26100", "from_account": "29", "to_account": "15", "transaction_type_code": "6"},
+    {"amount_of_transaction": "17694", "from_account": "9", "to_account": "22", "transaction_type_code": "3"},
+    {"amount_of_transaction": "22288", "from_account": "9", "to_account": "16", "transaction_type_code": "2"},
+    {"amount_of_transaction": "21293", "from_account": "27", "to_account": "24", "transaction_type_code": "3"},
+    {"amount_of_transaction": "29410", "from_account": "3", "to_account": "25", "transaction_type_code": "2"},
+    {"amount_of_transaction": "18546", "from_account": "3", "to_account": "10", "transaction_type_code": "2"},
+    {"amount_of_transaction": "24941", "from_account": "12", "to_account": "37", "transaction_type_code": "5"},
+    {"amount_of_transaction": "20406", "from_account": "14", "to_account": "37", "transaction_type_code": "7"},
+    {"amount_of_transaction": "12815", "from_account": "17", "to_account": "11", "transaction_type_code": "4"},
+    {"amount_of_transaction": "26199", "from_account": "22", "to_account": "33", "transaction_type_code": "4"},
+    {"amount_of_transaction": "11319", "from_account": "21", "to_account": "26", "transaction_type_code": "4"},
+    {"amount_of_transaction": "27724", "from_account": "16", "to_account": "22", "transaction_type_code": "2"},
+    {"amount_of_transaction": "19832", "from_account": "21", "to_account": "4", "transaction_type_code": "1"},
+    {"amount_of_transaction": "17042", "from_account": "28", "to_account": "18", "transaction_type_code": "4"},
+    {"amount_of_transaction": "27173", "from_account": "22", "to_account": "3", "transaction_type_code": "5"},
+    {"amount_of_transaction": "26024", "from_account": "10", "to_account": "20", "transaction_type_code": "3"},
+    {"amount_of_transaction": "27562", "from_account": "26", "to_account": "8", "transaction_type_code": "1"},
+    {"amount_of_transaction": "29205", "from_account": "24", "to_account": "28", "transaction_type_code": "4"},
+    {"amount_of_transaction": "14577", "from_account": "21", "to_account": "22", "transaction_type_code": "3"},
+    {"amount_of_transaction": "11500", "from_account": "8", "to_account": "16", "transaction_type_code": "3"},
+    {"amount_of_transaction": "18187", "from_account": "17", "to_account": "33", "transaction_type_code": "1"},
+    {"amount_of_transaction": "26126", "from_account": "40", "to_account": "16", "transaction_type_code": "6"},
+    {"amount_of_transaction": "22499", "from_account": "22", "to_account": "33", "transaction_type_code": "4"},
+    {"amount_of_transaction": "11620", "from_account": "35", "to_account": "6", "transaction_type_code": "5"},
+    {"amount_of_transaction": "13994", "from_account": "13", "to_account": "20", "transaction_type_code": "4"},
+    {"amount_of_transaction": "22832", "from_account": "18", "to_account": "34", "transaction_type_code": "3"},
+    {"amount_of_transaction": "10249", "from_account": "22", "to_account": "29", "transaction_type_code": "2"},
+    {"amount_of_transaction": "11224", "from_account": "16", "to_account": "2", "transaction_type_code": "3"},
+    {"amount_of_transaction": "26441", "from_account": "34", "to_account": "9", "transaction_type_code": "2"},
+    {"amount_of_transaction": "18264", "from_account": "28", "to_account": "23", "transaction_type_code": "2"},
+    {"amount_of_transaction": "18682", "from_account": "34", "to_account": "12", "transaction_type_code": "1"},
+    {"amount_of_transaction": "20035", "from_account": "18", "to_account": "29", "transaction_type_code": "2"},
+    {"amount_of_transaction": "19344", "from_account": "25", "to_account": "39", "transaction_type_code": "6"},
+    {"amount_of_transaction": "29620", "from_account": "17", "to_account": "15", "transaction_type_code": "6"},
+    {"amount_of_transaction": "12504", "from_account": "19", "to_account": "23", "transaction_type_code": "4"},
+    {"amount_of_transaction": "15107", "from_account": "17", "to_account": "9", "transaction_type_code": "7"},
+    {"amount_of_transaction": "23042", "from_account": "32", "to_account": "12", "transaction_type_code": "6"},
+    {"amount_of_transaction": "10434", "from_account": "25", "to_account": "1", "transaction_type_code": "4"},
+    {"amount_of_transaction": "16956", "from_account": "23", "to_account": "15", "transaction_type_code": "2"},
+    {"amount_of_transaction": "12345", "from_account": "9", "to_account": "17", "transaction_type_code": "2"},
+    {"amount_of_transaction": "27619", "from_account": "3", "to_account": "11", "transaction_type_code": "3"},
+    {"amount_of_transaction": "24725", "from_account": "20", "to_account": "35", "transaction_type_code": "3"},
+    {"amount_of_transaction": "14292", "from_account": "8", "to_account": "21", "transaction_type_code": "4"},
+    {"amount_of_transaction": "20938", "from_account": "33", "to_account": "28", "transaction_type_code": "6"},
+    {"amount_of_transaction": "14844", "from_account": "24", "to_account": "27", "transaction_type_code": "4"},
+    {"amount_of_transaction": "17253", "from_account": "10", "to_account": "39", "transaction_type_code": "6"},
+    {"amount_of_transaction": "17939", "from_account": "24", "to_account": "5", "transaction_type_code": "6"},
+    {"amount_of_transaction": "13950", "from_account": "6", "to_account": "24", "transaction_type_code": "5"},
+    {"amount_of_transaction": "11775", "from_account": "7", "to_account": "5", "transaction_type_code": "4"},
+    {"amount_of_transaction": "21146", "from_account": "18", "to_account": "7", "transaction_type_code": "6"},
+    {"amount_of_transaction": "29833", "from_account": "39", "to_account": "32", "transaction_type_code": "2"},
+    {"amount_of_transaction": "19838", "from_account": "30", "to_account": "29", "transaction_type_code": "7"},
+    {"amount_of_transaction": "20483", "from_account": "29", "to_account": "16", "transaction_type_code": "3"},
+    {"amount_of_transaction": "13237", "from_account": "8", "to_account": "24", "transaction_type_code": "5"},
+    {"amount_of_transaction": "14043", "from_account": "21", "to_account": "13", "transaction_type_code": "5"},
+    {"amount_of_transaction": "25458", "from_account": "7", "to_account": "20", "transaction_type_code": "2"},
+    {"amount_of_transaction": "24792", "from_account": "23", "to_account": "5", "transaction_type_code": "6"},
+    {"amount_of_transaction": "17748", "from_account": "35", "to_account": "38", "transaction_type_code": "2"},
+    {"amount_of_transaction": "15618", "from_account": "5", "to_account": "29", "transaction_type_code": "4"},
+    {"amount_of_transaction": "18696", "from_account": "31", "to_account": "37", "transaction_type_code": "5"},
+    {"amount_of_transaction": "21181", "from_account": "30", "to_account": "26", "transaction_type_code": "5"},
+    {"amount_of_transaction": "21642", "from_account": "35", "to_account": "5", "transaction_type_code": "1"},
+    {"amount_of_transaction": "24152", "from_account": "29", "to_account": "33", "transaction_type_code": "5"},
+    {"amount_of_transaction": "11990", "from_account": "3", "to_account": "14", "transaction_type_code": "6"},
+    {"amount_of_transaction": "28948", "from_account": "17", "to_account": "17", "transaction_type_code": "1"},
+    {"amount_of_transaction": "17308", "from_account": "15", "to_account": "16", "transaction_type_code": "5"},
+    {"amount_of_transaction": "26716", "from_account": "6", "to_account": "32", "transaction_type_code": "4"},
+    {"amount_of_transaction": "22028", "from_account": "30", "to_account": "19", "transaction_type_code": "5"},
+    {"amount_of_transaction": "14143", "from_account": "3", "to_account": "31", "transaction_type_code": "2"},
+    {"amount_of_transaction": "23772", "from_account": "22", "to_account": "36", "transaction_type_code": "6"},
+    {"amount_of_transaction": "12859", "from_account": "32", "to_account": "36", "transaction_type_code": "3"},
+    {"amount_of_transaction": "26659", "from_account": "13", "to_account": "12", "transaction_type_code": "6"},
+    {"amount_of_transaction": "21031", "from_account": "30", "to_account": "4", "transaction_type_code": "4"},
+    {"amount_of_transaction": "10862", "from_account": "7", "to_account": "33", "transaction_type_code": "3"},
+    {"amount_of_transaction": "24071", "from_account": "6", "to_account": "20", "transaction_type_code": "4"},
+    {"amount_of_transaction": "28346", "from_account": "35", "to_account": "6", "transaction_type_code": "6"},
+    {"amount_of_transaction": "10302", "from_account": "11", "to_account": "28", "transaction_type_code": "5"},
+    {"amount_of_transaction": "16546", "from_account": "28", "to_account": "29", "transaction_type_code": "4"},
+    {"amount_of_transaction": "23201", "from_account": "38", "to_account": "7", "transaction_type_code": "2"},
+    {"amount_of_transaction": "13762", "from_account": "19", "to_account": "3", "transaction_type_code": "4"},
+    {"amount_of_transaction": "26540", "from_account": "31", "to_account": "31", "transaction_type_code": "5"},
+    {"amount_of_transaction": "29214", "from_account": "18", "to_account": "11", "transaction_type_code": "3"},
+    {"amount_of_transaction": "21789", "from_account": "7", "to_account": "40", "transaction_type_code": "3"},
+    {"amount_of_transaction": "13024", "from_account": "28", "to_account": "27", "transaction_type_code": "2"},
+    {"amount_of_transaction": "26017", "from_account": "20", "to_account": "4", "transaction_type_code": "2"},
+    {"amount_of_transaction": "29524", "from_account": "14", "to_account": "38", "transaction_type_code": "4"},
+    {"amount_of_transaction": "26978", "from_account": "11", "to_account": "32", "transaction_type_code": "4"},
+    {"amount_of_transaction": "13342", "from_account": "38", "to_account": "12", "transaction_type_code": "4"},
+    {"amount_of_transaction": "15721", "from_account": "13", "to_account": "14", "transaction_type_code": "3"},
+    {"amount_of_transaction": "12343", "from_account": "39", "to_account": "10", "transaction_type_code": "5"},
+    {"amount_of_transaction": "27736", "from_account": "34", "to_account": "27", "transaction_type_code": "3"}]
