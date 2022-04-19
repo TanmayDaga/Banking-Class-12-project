@@ -1,4 +1,3 @@
-from Database import DummyData
 from Database.Entities.Users import Users
 from Log import Log
 from Constants import *
@@ -10,7 +9,7 @@ from Database.Entities.Transactions import Transaction
 
 from Database.MyDbHelper import MyDbHelper
 from mysql.connector.connection import MySQLCursor
-
+from Database import DummyData
 
 class Repository:
     """The purpose of class is to establish connection between ui and database"""
@@ -47,7 +46,7 @@ class Repository:
         if Repository.__dbHelper is None:
             Repository.__dbHelper = MyDbHelper(host=host, user=user, password=password)
         self.__initialiseDb()
-        
+        self.execute(f"USE {DATABASE_NAME}")
 
     def __initialiseDb(self):
         """
@@ -93,7 +92,7 @@ class Repository:
 
         try:
             cursor.execute(query)
-            Log.info(__file__, "Query Successful")
+
 
             return cursor
         except Exception as e:
